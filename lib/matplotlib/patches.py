@@ -55,6 +55,18 @@ docstring.interpd.update(Patch="""
 
           """)
 
+from IPython.config import Unicode
+
+class MaybeUnicode(Unicode):
+    """A trait for unicode strings, or None"""
+
+    default_value = None
+
+    def validate(self, obj, value):
+        if value is None:
+            return value
+        else:
+            return super(MaybeUnicode,self).validate(obj, value)
 
 class Patch(artist.Artist):
     """
@@ -66,6 +78,8 @@ class Patch(artist.Artist):
     zorder = 1
     validCap = ('butt', 'round', 'projecting')
     validJoin = ('miter', 'round', 'bevel')
+
+    t_color = MaybeUnicode(None,config=True)
 
     def __str__(self):
         return str(self.__class__).split('.')[-1]
@@ -287,8 +301,14 @@ class Patch(artist.Artist):
 
         ACCEPTS: mpl color spec, or None for default, or 'none' for no color
         """
+        #print('setting color to', color, self.__class__, self.config)
         if color is None:
-            color = mpl.rcParams['patch.facecolor']
+            if self.t_color is not None and False:
+                color = self.t_color
+                color = mpl.rcParams['patch.facecolor']
+            else :
+                color = mpl.rcParams['patch.facecolor']
+
         # save: otherwise changing _fill may lose alpha information
         self._original_facecolor = color
         self._facecolor = colors.colorConverter.to_rgba(color, self._alpha)

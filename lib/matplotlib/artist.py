@@ -68,13 +68,10 @@ def allow_rasterization(draw):
     draw_wrapper._supports_rasterization = True
     return draw_wrapper
 
+from IPython.config import Configurable
+from IPython.config import Config
 
-def _stale_axes_callback(self, val):
-    if self.axes:
-        self.axes.stale = val
-
-
-class Artist(object):
+class Artist(Configurable):
     """
     Abstract base class for someone who renders into a
     :class:`FigureCanvas`.
@@ -83,10 +80,14 @@ class Artist(object):
     aname = 'Artist'
     zorder = 0
 
-    def __init__(self):
-        self._stale = True
-        self.stale_callback = None
-        self._axes = None
+    def __init__(self, config=None):
+        
+        c = getattr(matplotlib,'config',Config({}))
+        if config :
+            c.merge(config)
+        #print('init Artist with',c)
+        super(Artist, self).__init__(config=c)
+
         self.figure = None
 
         self._transform = None
