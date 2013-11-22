@@ -74,6 +74,7 @@ def segment_hits(cx, cy, x, y, radius):
     #print points,lines
     return np.concatenate((points, lines))
 
+from IPython.utils.traitlets import Float
 
 def _mark_every_path(markevery, tpath, affine, ax_transform):
     """
@@ -248,6 +249,8 @@ class Line2D(Artist):
                 % (",".join(["(%g,%g)" % (x, y) for x, y
                              in zip(self._x, self._y)]))
 
+    t_lw = Float(2, config=True)
+
     def __init__(self, xdata, ydata,
                  linewidth=None,  # all Nones default to rc
                  linestyle=None,
@@ -267,6 +270,7 @@ class Line2D(Artist):
                  pickradius=5,
                  drawstyle=None,
                  markevery=None,
+                 parent=None,
                  **kwargs
                  ):
         """
@@ -282,7 +286,7 @@ class Line2D(Artist):
         :meth:`set_drawstyle` for a description of the draw styles.
 
         """
-        Artist.__init__(self)
+        Artist.__init__(self, parent=parent)
 
         #convert sequences to numpy arrays
         if not iterable(xdata):
@@ -291,7 +295,8 @@ class Line2D(Artist):
             raise RuntimeError('ydata must be a sequence')
 
         if linewidth is None:
-            linewidth = rcParams['lines.linewidth']
+            linewidth = self.t_lw
+            print('set lw to', linewidth, 'parent=',parent)
 
         if linestyle is None:
             linestyle = rcParams['lines.linestyle']

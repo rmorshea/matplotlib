@@ -80,13 +80,14 @@ class Tick(artist.Artist):
                  label1On=True,
                  label2On=False,
                  major=True,
+                 parent=None
                  ):
         """
         bbox is the Bound2D bounding box in display coords of the Axes
         loc is the tick location in data coords
         size is the tick size in points
         """
-        artist.Artist.__init__(self)
+        artist.Artist.__init__(self, parent=parent)
 
         if gridOn is None:
             if major and (rcParams['axes.grid.which'] in ('both', 'major')):
@@ -394,10 +395,15 @@ class XTick(Tick):
     def _get_tick1line(self):
         'Get the default line2D instance'
         # x in data coords, y in axes coords
-        l = mlines.Line2D(xdata=(0,), ydata=(0,), color=self._color,
-                          linestyle='None', marker=self._tickmarkers[0],
-                          markersize=self._size,
-                          markeredgewidth=self._width, zorder=self._zorder)
+        l = mlines.Line2D(xdata=(0,), ydata=(0,),
+                   color=self._color,
+                   linestyle='None',
+                   marker=self._tickmarkers[0],
+                   markersize=self._size,
+                   markeredgewidth=self._width,
+                   zorder=self._zorder,
+                   parent=self
+                   )
         l.set_transform(self.axes.get_xaxis_transform(which='tick1'))
         self._set_artist_props(l)
         return l
@@ -406,12 +412,14 @@ class XTick(Tick):
         'Get the default line2D instance'
         # x in data coords, y in axes coords
         l = mlines.Line2D(xdata=(0,), ydata=(1,),
-                          color=self._color,
-                          linestyle='None',
-                          marker=self._tickmarkers[1],
-                          markersize=self._size,
-                          markeredgewidth=self._width,
-                          zorder=self._zorder)
+                       color=self._color,
+                       linestyle='None',
+                       marker=self._tickmarkers[1],
+                       markersize=self._size,
+                       markeredgewidth=self._width,
+                       zorder=self._zorder,
+                       parent=self
+                       )
 
         l.set_transform(self.axes.get_xaxis_transform(which='tick2'))
         self._set_artist_props(l)
@@ -421,11 +429,13 @@ class XTick(Tick):
         'Get the default line2D instance'
         # x in data coords, y in axes coords
         l = mlines.Line2D(xdata=(0.0, 0.0), ydata=(0, 1.0),
-                          color=rcParams['grid.color'],
-                          linestyle=rcParams['grid.linestyle'],
-                          linewidth=rcParams['grid.linewidth'],
-                          alpha=rcParams['grid.alpha'],
-                          markersize=0)
+                   color=rcParams['grid.color'],
+                   linestyle=rcParams['grid.linestyle'],
+                   linewidth=rcParams['grid.linewidth'],
+                   alpha=rcParams['grid.alpha'],
+                   markersize=0,
+                   parent=self
+                   )
         l.set_transform(self.axes.get_xaxis_transform(which='grid'))
         l.get_path()._interpolation_steps = GRIDLINE_INTERPOLATION_STEPS
         self._set_artist_props(l)
@@ -530,12 +540,14 @@ class YTick(Tick):
         # x in axes coords, y in data coords
 
         l = mlines.Line2D((0,), (0,),
-                          color=self._color,
-                          marker=self._tickmarkers[0],
-                          linestyle='None',
-                          markersize=self._size,
-                          markeredgewidth=self._width,
-                          zorder=self._zorder)
+                    color=self._color,
+                    marker=self._tickmarkers[0],
+                    linestyle='None',
+                    markersize=self._size,
+                    markeredgewidth=self._width,
+                    zorder=self._zorder,
+                    parent=self
+                    )
         l.set_transform(self.axes.get_yaxis_transform(which='tick1'))
         self._set_artist_props(l)
         return l
@@ -544,12 +556,14 @@ class YTick(Tick):
         'Get the default line2D instance'
         # x in axes coords, y in data coords
         l = mlines.Line2D((1,), (0,),
-                          color=self._color,
-                          marker=self._tickmarkers[1],
-                          linestyle='None',
-                          markersize=self._size,
-                          markeredgewidth=self._width,
-                          zorder=self._zorder)
+                    color=self._color,
+                    marker=self._tickmarkers[1],
+                    linestyle='None',
+                    markersize=self._size,
+                    markeredgewidth=self._width,
+                    zorder=self._zorder,
+                    parent=self
+                    )
         l.set_transform(self.axes.get_yaxis_transform(which='tick2'))
         self._set_artist_props(l)
         return l
@@ -558,11 +572,13 @@ class YTick(Tick):
         'Get the default line2D instance'
         # x in axes coords, y in data coords
         l = mlines.Line2D(xdata=(0, 1), ydata=(0, 0),
-                          color=rcParams['grid.color'],
-                          linestyle=rcParams['grid.linestyle'],
-                          linewidth=rcParams['grid.linewidth'],
-                          alpha=rcParams['grid.alpha'],
-                          markersize=0)
+                    color=rcParams['grid.color'],
+                    linestyle=rcParams['grid.linestyle'],
+                    linewidth=rcParams['grid.linewidth'],
+                    alpha=rcParams['grid.alpha'],
+                    markersize=0,
+                    parent=self
+                    )
 
         l.set_transform(self.axes.get_yaxis_transform(which='grid'))
         l.get_path()._interpolation_steps = GRIDLINE_INTERPOLATION_STEPS
