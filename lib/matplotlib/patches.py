@@ -55,7 +55,7 @@ docstring.interpd.update(Patch="""
 
           """)
 
-from IPython.utils.traitlets import Unicode,Float
+from IPConfigurable.traitlets import Unicode,Float
 
 class MaybeFloat(Float):
     """A trait for unicode strings, or None"""
