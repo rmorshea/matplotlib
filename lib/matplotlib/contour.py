@@ -28,6 +28,8 @@ import matplotlib.patches as mpatches
 import matplotlib.texmanager as texmanager
 import matplotlib.transforms as mtrans
 
+from .traitlest import TransformInstance
+
 # Import needed for adding manual selection capability to clabel
 from matplotlib.blocking_input import BlockingContourLabeler
 
@@ -753,7 +755,6 @@ def _find_closest_point_on_path(lc, point):
             legmin = leg
 
     return (dmin, xcmin, legmin)
-
 
 class ContourSet(cm.ScalarMappable, ContourLabeler):
     """

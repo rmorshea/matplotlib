@@ -676,7 +676,7 @@ class Axes(_AxesBase):
         .. plot:: mpl_examples/pylab_examples/annotation_demo2.py
         """
         a = mtext.Annotation(*args, **kwargs)
-        a.set_transform(mtransforms.IdentityTransform())
+        a.transform = mtransforms.IdentityTransform()
         self._set_artist_props(a)
         if 'clip_on' in kwargs:
             a.set_clip_path(self.patch)
@@ -873,7 +873,7 @@ class Axes(_AxesBase):
 
         verts = (xmin, ymin), (xmin, ymax), (xmax, ymax), (xmax, ymin)
         p = mpatches.Polygon(verts, **kwargs)
-        p.set_transform(trans)
+        p.transform = trans
         self.add_patch(p)
         self.autoscale_view(scalex=False)
         return p
@@ -928,7 +928,7 @@ class Axes(_AxesBase):
 
         verts = [(xmin, ymin), (xmin, ymax), (xmax, ymax), (xmax, ymin)]
         p = mpatches.Polygon(verts, **kwargs)
-        p.set_transform(trans)
+        p.transform = trans
         self.add_patch(p)
         self.autoscale_view(scaley=False)
         return p
@@ -3893,6 +3893,7 @@ class Axes(_AxesBase):
                 transOffset=kwargs.pop('transform', self.transData),
                 alpha=alpha
                 )
+        #!TODO : not sure of how to handle collections
         collection.set_transform(mtransforms.IdentityTransform())
         collection.update(kwargs)
 
