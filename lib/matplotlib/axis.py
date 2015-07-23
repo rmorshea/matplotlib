@@ -1779,7 +1779,7 @@ class XAxis(Axis):
         if self.label_position == 'bottom':
             try:
                 spine = self.axes.spines['bottom']
-                spinebbox = spine.get_transform().transform_path(
+                spinebbox = spine.transform.transform_path(
                     spine.get_path()).get_extents()
             except KeyError:
                 # use axes if spine doesn't exist
@@ -1794,7 +1794,7 @@ class XAxis(Axis):
         else:
             try:
                 spine = self.axes.spines['top']
-                spinebbox = spine.get_transform().transform_path(
+                spinebbox = spine.transform.transform_path(
                     spine.get_path()).get_extents()
             except KeyError:
                 # use axes if spine doesn't exist
@@ -2101,7 +2101,7 @@ class YAxis(Axis):
         if self.label_position == 'left':
             try:
                 spine = self.axes.spines['left']
-                spinebbox = spine.get_transform().transform_path(
+                spinebbox = spine.transform.transform_path(
                     spine.get_path()).get_extents()
             except KeyError:
                 # use axes if spine doesn't exist
@@ -2116,7 +2116,7 @@ class YAxis(Axis):
         else:
             try:
                 spine = self.axes.spines['right']
-                spinebbox = spine.get_transform().transform_path(
+                spinebbox = spine.transform.transform_path(
                     spine.get_path()).get_extents()
             except KeyError:
                 # use axes if spine doesn't exist
