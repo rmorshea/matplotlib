@@ -3894,7 +3894,7 @@ class Axes(_AxesBase):
                 alpha=alpha
                 )
         #!TODO : not sure of how to handle collections
-        collection.set_transform(mtransforms.IdentityTransform())
+        collection.transform = mtransforms.IdentityTransform()
         collection.update(kwargs)
 
         if colors is None:
