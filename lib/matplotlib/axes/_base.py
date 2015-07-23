@@ -784,9 +784,8 @@ class _AxesBase(martist.Artist):
                 "center", "left")
 
     def _update_transScale(self):
-        self.transScale.set(
-            mtransforms.blended_transform_factory(
-                self.xaxis.get_transform(), self.yaxis.get_transform()))
+        self.transScale.set(mtransforms.blended_transform_factory(
+            self.xaxis.transform, self.yaxis.transform))
         if hasattr(self, "lines"):
             for line in self.lines:
                 try:
@@ -859,7 +858,7 @@ class _AxesBase(martist.Artist):
     def _set_artist_props(self, a):
         """set the boilerplate props for artists added to axes"""
         a.set_figure(self.figure)
-        if not a.transform_set):
+        if not a.transform_set:
             a.transform = self.transData
 
         a.axes = self
@@ -1711,7 +1710,7 @@ class _AxesBase(martist.Artist):
         if path.vertices.size == 0:
             return
 
-        line_trans = line.get_transform()
+        line_trans = line.transform
 
         if line_trans == self.transData:
             data_path = path
@@ -1786,7 +1785,7 @@ class _AxesBase(martist.Artist):
                                  self.transData)
                 xys = patch_to_data.transform(xys)
 
-            updatex, updatey = patch.get_transform().\
+            updatex, updatey = patch.transform.\
                 contains_branch_seperately(self.transData)
             self.update_datalim(xys, updatex=updatex,
                                 updatey=updatey)
@@ -2290,7 +2289,7 @@ class _AxesBase(martist.Artist):
             gc.set_clip_rectangle(self.bbox)
             gc.set_clip_path(mtransforms.TransformedPath(
                 self.patch.get_path(),
-                self.patch.get_transform()))
+                self.patch.transform))
 
             renderer.draw_image(gc, round(l), round(b), im)
             gc.restore()
