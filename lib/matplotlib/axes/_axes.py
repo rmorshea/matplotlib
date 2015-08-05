@@ -3891,7 +3891,6 @@ class Axes(_AxesBase):
                 transOffset=kwargs.pop('transform', self.transData),
                 alpha=alpha
                 )
-        #!TODO : not sure of how to handle collections
         collection.transform = mtransforms.IdentityTransform()
         collection.update(kwargs)
 
