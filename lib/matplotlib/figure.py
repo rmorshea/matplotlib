@@ -896,7 +896,7 @@ class Figure(Artist):
 
         if isinstance(args[0], Axes):
             a = args[0]
-            if a.get_figure() is not self:
+            if a.figure is not self:
                 msg = "The Axes must have been created in the present figure"
                 raise ValueError(msg)
         else:
@@ -975,7 +975,7 @@ class Figure(Artist):
         if isinstance(args[0], SubplotBase):
 
             a = args[0]
-            if a.get_figure() is not self:
+            if a.figure is not self:
                 msg = ("The Subplot must have been created in the present"
                        " figure")
                 raise ValueError(msg)
@@ -1284,7 +1284,7 @@ class Figure(Artist):
 
     def _set_artist_props(self, a):
         if a != self:
-            a.set_figure(self)
+            a.figure = self
         a.stale_callback = _stale_figure_callback
         a.transform = self.transFigure
 
