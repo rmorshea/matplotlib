@@ -1424,11 +1424,12 @@ class Axes(_AxesBase):
         if c is not None:
             kwargs['color'] = c
 
-        for line in self._get_lines(*args, **kwargs):
-            self.add_line(line)
-            lines.append(line)
+        with self.hold_trait_notifications():
+            for line in self._get_lines(*args, **kwargs):
+                self.add_line(line)
+                lines.append(line)
 
-        self.autoscale_view(scalex=scalex, scaley=scaley)
+            self.autoscale_view(scalex=scalex, scaley=scaley)
         return lines
 
     @unpack_labeled_data(replace_names=["x", "y"], label_namer="y")
@@ -5275,7 +5276,7 @@ class Axes(_AxesBase):
         y = Y.compressed()
 
         # Transform from native to data coordinates?
-        t = collection.transform
+        t = collection.private('transform')
         if (not isinstance(t, mtransforms.Transform) and
             hasattr(t, '_as_mpl_transform')):
             t = t._as_mpl_transform(self.axes)
@@ -5424,7 +5425,7 @@ class Axes(_AxesBase):
         self.grid(False)
 
         # Transform from native to data coordinates?
-        t = collection.transform
+        t = collection.private('transform')
         if (not isinstance(t, mtransforms.Transform) and
             hasattr(t, '_as_mpl_transform')):
             t = t._as_mpl_transform(self.axes)
