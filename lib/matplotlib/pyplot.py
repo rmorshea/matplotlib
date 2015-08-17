@@ -1219,15 +1219,15 @@ def subplots(nrows=1, ncols=1, sharex=False, sharey=False, squeeze=True,
         # turn off all but the bottom row
         for ax in axarr[:-1, :].flat:
             for label in ax.get_xticklabels():
-                label.set_visible(False)
-            ax.xaxis.offsetText.set_visible(False)
+                label.visible = False
+            ax.xaxis.offsetText.visible = False
 
     if sharey in ["row", "all"] and ncols > 1:
         # turn off all but the first column
         for ax in axarr[:, 1:].flat:
             for label in ax.get_yticklabels():
-                label.set_visible(False)
-            ax.yaxis.offsetText.set_visible(False)
+                label.visible = False
+            ax.yaxis.offsetText.visible = False
 
     if squeeze:
         # Reshape the array to have the final desired dimension (nrow,ncol),
