@@ -4275,7 +4275,7 @@ class Axes(_AxesBase):
         collection.set_array(accum)
         collection.set_cmap(cmap)
         collection.set_norm(norm)
-        collection.set_alpha(alpha)
+        collection.alpha = alpha
         collection.update(kwargs)
 
         if vmin is not None or vmax is not None:
@@ -4336,7 +4336,7 @@ class Axes(_AxesBase):
         hbar.set_array(values)
         hbar.set_cmap(cmap)
         hbar.set_norm(norm)
-        hbar.set_alpha(alpha)
+        hbar.alpha = alpha
         hbar.update(kwargs)
         self.add_collection(hbar, autolim=False)
 
@@ -4364,7 +4364,7 @@ class Axes(_AxesBase):
         vbar.set_array(values)
         vbar.set_cmap(cmap)
         vbar.set_norm(norm)
-        vbar.set_alpha(alpha)
+        vbar.alpha = alpha
         vbar.update(kwargs)
         self.add_collection(vbar, autolim=False)
 
@@ -4946,7 +4946,7 @@ class Axes(_AxesBase):
                               resample=resample, **kwargs)
 
         im.set_data(X)
-        im.set_alpha(alpha)
+        im.alpha = alpha
         if im.get_clip_path() is None:
             # image does not already have clipping set, clip to axes patch
             im.set_clip_path(self.patch)
@@ -5262,7 +5262,7 @@ class Axes(_AxesBase):
 
         collection = mcoll.PolyCollection(verts, **kwargs)
 
-        collection.set_alpha(alpha)
+        collection.alpha = alpha
         collection.set_array(C)
         if norm is not None and not isinstance(norm, mcolors.Normalize):
             msg = "'norm' must be an instance of 'mcolors.Normalize'"
@@ -5413,7 +5413,7 @@ class Axes(_AxesBase):
         collection = mcoll.QuadMesh(
             Nx - 1, Ny - 1, coords,
             antialiased=antialiased, shading=shading, **kwargs)
-        collection.set_alpha(alpha)
+        collection.alpha = alpha
         collection.set_array(C)
         if norm is not None and not isinstance(norm, mcolors.Normalize):
             msg = "'norm' must be an instance of 'mcolors.Normalize'"
@@ -5597,7 +5597,7 @@ class Axes(_AxesBase):
             # handle relevant superclass kwargs; the initializer
             # should do much more than it does now.
             collection = mcoll.QuadMesh(nc, nr, coords, 0, edgecolors="None")
-            collection.set_alpha(alpha)
+            collection.alpha = alpha
             collection.set_array(C)
             collection.set_cmap(cmap)
             collection.set_norm(norm)
@@ -5616,7 +5616,7 @@ class Axes(_AxesBase):
                                         extent=(xl, xr, yb, yt),
                                          **kwargs)
             im.set_data(C)
-            im.set_alpha(alpha)
+            im.alpha = alpha
             self.add_image(im)
             ret = im
 
