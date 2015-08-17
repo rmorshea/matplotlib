@@ -26,8 +26,8 @@ is_string_like = cbook.is_string_like
 class ParasiteAxesBase(object):
 
     def get_images_artists(self):
-        artists = set([a for a in self.get_children() if a.get_visible()])
-        images = set([a for a in self.images if a.get_visible()])
+        artists = set([a for a in self.get_children() if a.visible])
+        images = set([a for a in self.images if a.visible])
 
         return list(images), list(artists - images)
 
@@ -329,14 +329,14 @@ class HostAxesBase(object):
         # for normal axes
 
         self.axis["right"].toggle(all=False)
-        self.axis["right"].line.set_visible(True)
+        self.axis["right"].line.visible = True
 
-        ax2.axis["right"].set_visible(True)
+        ax2.axis["right"].visible = True
         ax2.axis["left","top", "bottom"].toggle(all=False)
-        ax2.axis["left","top", "bottom"].line.set_visible(False)
+        ax2.axis["left","top", "bottom"].line.visible = False
 
         ax2.axis["right"].toggle(all=True)
-        ax2.axis["right"].line.set_visible(False)
+        ax2.axis["right"].line.visible = False
 
         return ax2
 
@@ -361,14 +361,14 @@ class HostAxesBase(object):
         self.parasites.append(ax2)
 
         self.axis["top"].toggle(all=False)
-        self.axis["top"].line.set_visible(True)
+        self.axis["top"].line.visible = True
 
-        ax2.axis["top"].set_visible(True)
+        ax2.axis["top"].visible = True
         ax2.axis["left","right", "bottom"].toggle(all=False)
-        ax2.axis["left","right", "bottom"].line.set_visible(False)
+        ax2.axis["left","right", "bottom"].line.visible = False
 
         ax2.axis["top"].toggle(all=True)
-        ax2.axis["top"].line.set_visible(False)
+        ax2.axis["top"].line.visible = False
 
         return ax2
 
@@ -414,16 +414,16 @@ class HostAxesBase(object):
 
 
         self.axis["top","right"].toggle(all=False)
-        self.axis["top","right"].line.set_visible(False)
+        self.axis["top","right"].line.visible = False
         #self.axis["left","bottom"].toggle(label=True)
 
-        ax2.axis["top","right"].set_visible(True)
+        ax2.axis["top","right"].visible = True
 
         ax2.axis["bottom","left"].toggle(all=False)
-        ax2.axis["bottom","left"].line.set_visible(False)
+        ax2.axis["bottom","left"].line.visible = False
 
         ax2.axis["top","right"].toggle(all=True)
-        ax2.axis["top","right"].line.set_visible(True)
+        ax2.axis["top","right"].line.visible = True
 
 
         # # for axisline axes
