@@ -1060,7 +1060,7 @@ class _AxesBase(martist.Artist):
 
         for _title in (self.title, self._left_title, self._right_title):
             _title.transform = self.transAxes + self.titleOffsetTrans
-            _title.set_clip_box(None)
+            _title.clipbox = None
             self._set_artist_props(_title)
 
         # the patch draws the background of the axes.  we want this to
@@ -1694,7 +1694,7 @@ class _AxesBase(martist.Artist):
         self.collections.append(collection)
         self._set_artist_props(collection)
 
-        if collection.get_clip_path() is None:
+        if collection.clippath is None:
             collection.set_clip_path(self.patch)
 
         if autolim:
@@ -1722,7 +1722,7 @@ class _AxesBase(martist.Artist):
         Returns the line.
         """
         self._set_artist_props(line)
-        if line.get_clip_path() is None:
+        if line.clippath is None:
             line.set_clip_path(self.patch)
 
         self._update_line_limits(line)
@@ -1787,7 +1787,7 @@ class _AxesBase(martist.Artist):
         """
 
         self._set_artist_props(p)
-        if p.get_clip_path() is None:
+        if p.clippath is None:
             p.set_clip_path(self.patch)
         self._update_patch_limits(p)
         self.patches.append(p)
