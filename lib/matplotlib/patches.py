@@ -41,8 +41,8 @@ docstring.interpd.update(Patch="""
           animated            [True | False]
           antialiased or aa   [True | False]
           capstyle            ['butt' | 'round' | 'projecting']
-          clip_box            a matplotlib.transform.Bbox instance
-          clip_on             [True | False]
+          clipbox             a matplotlib.transform.Bbox instance
+          clipon              [True | False]
           edgecolor or ec     any matplotlib color
           facecolor or fc     any matplotlib color
           figure              a matplotlib.figure.Figure instance
@@ -499,7 +499,7 @@ class Patch(artist.Artist):
         if not self.visible:
             return
 
-        renderer.open_group('patch', self.get_gid())
+        renderer.open_group('patch', self.gid)
         gc = renderer.new_gc()
 
         gc.set_foreground(self._edgecolor, isRGBA=True)
@@ -1724,7 +1724,7 @@ def bbox_artist(artist, renderer, props=None, fill=True):
                   fill=fill,
                   )
     r.transform = transforms.IdentityTransform()
-    r.set_clip_on(False)
+    r.clipon = False
     r.update(props)
     r.draw(renderer)
 
@@ -1746,7 +1746,7 @@ def draw_bbox(bbox, renderer, color='k', trans=None):
                   )
     if trans is not None:
         r.transform = trans
-    r.set_clip_on(False)
+    r.clipon = False
     r.draw(renderer)
 
 
@@ -4243,7 +4243,7 @@ class FancyArrowPatch(Patch):
         if not self.visible:
             return
 
-        renderer.open_group('patch', self.get_gid())
+        renderer.open_group('patch', self.gid)
         gc = renderer.new_gc()
 
         gc.set_foreground(self._edgecolor, isRGBA=True)
@@ -4321,7 +4321,7 @@ class ConnectionPatch(FancyArrowPatch):
                  shrinkB=0.,
                  mutation_scale=10.,
                  mutation_aspect=None,
-                 clip_on=False,
+                 clipon=False,
                  dpi_cor=1.,
                  **kwargs):
         """
@@ -4395,7 +4395,7 @@ class ConnectionPatch(FancyArrowPatch):
                                  shrinkB=shrinkB,
                                  mutation_scale=mutation_scale,
                                  mutation_aspect=mutation_aspect,
-                                 clip_on=clip_on,
+                                 clipon=clipon,
                                  dpi_cor=dpi_cor,
                                  **kwargs)
 
