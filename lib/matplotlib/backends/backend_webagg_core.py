@@ -323,7 +323,7 @@ class FigureCanvasWebAggCore(backend_agg.FigureCanvasAgg):
             # TODO: Be more suspicious of the input
             getattr(self.toolbar, event['name'])()
         elif e_type == 'refresh':
-            figure_label = self.figure.get_label()
+            figure_label = self.figure.label
             if not figure_label:
                 figure_label = "Figure {0}".format(self.manager.num)
             self.send_event('figure_label', label=figure_label)

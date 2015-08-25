@@ -183,7 +183,7 @@ class Axes(_AxesBase):
         """
         Get the xlabel text string.
         """
-        label = self.xaxis.get_label()
+        label = self.xaxis.label
         return label.get_text()
 
     @docstring.dedent_interpd
@@ -215,7 +215,7 @@ class Axes(_AxesBase):
         """
         Get the ylabel text string.
         """
-        label = self.yaxis.get_label()
+        label = self.yaxis.label
         return label.get_text()
 
     @docstring.dedent_interpd
@@ -261,7 +261,7 @@ class Axes(_AxesBase):
         has_handler = mlegend.Legend.get_legend_handler
 
         for handle in handles_original:
-            label = handle.get_label()
+            label = handle.label if hasattr(handle,'label') else handle.get_label()
             if label != '_nolegend_' and has_handler(handler_map, handle):
                 yield handle
 
@@ -278,7 +278,7 @@ class Axes(_AxesBase):
         handles = []
         labels = []
         for handle in self._get_legend_handles(legend_handler_map):
-            label = handle.get_label()
+            label = handle.label if hasattr(handle,'label') else handle.get_label()
             if label and not label.startswith('_'):
                 handles.append(handle)
                 labels.append(label)
@@ -303,7 +303,7 @@ class Axes(_AxesBase):
 
             line, = ax.plot([1, 2, 3], label='Inline label')
             # Overwrite the label by calling the method.
-            line.set_label('Label via method')
+            line.label = 'Label via method'
             ax.legend()
 
         Specific lines can be excluded from the automatic legend element
@@ -501,7 +501,7 @@ class Axes(_AxesBase):
             handles, labels = zip(*zip(handles, labels))
 
         elif handles is not None and labels is None:
-            labels = [handle.get_label() for handle in handles]
+            labels = [handle.label for handle in handles]
             for label, handle in zip(labels[:], handles[:]):
                 if label.startswith('_'):
                     warnings.warn('The handle {!r} has a label of {!r} which '
@@ -2600,7 +2600,7 @@ class Axes(_AxesBase):
                             **wedgeprops)
             slices.append(w)
             self.add_patch(w)
-            w.set_label(label)
+            w.label = label
 
             if shadow:
                 # make sure to add a shadow after the call to
@@ -2608,7 +2608,7 @@ class Axes(_AxesBase):
                 # set
                 shad = mpatches.Shadow(w, -0.02, -0.02)
                 shad.set_zorder(0.9 * w.get_zorder())
-                shad.set_label('_nolegend_')
+                shad.label = '_nolegend_'
                 self.add_patch(shad)
 
             xt = x + labeldistance * radius * math.cos(thetam)
@@ -6212,13 +6212,13 @@ class Axes(_AxesBase):
                 p = patch[0]
                 p.update(kwargs)
                 if lbl is not None:
-                    p.set_label(lbl)
+                    p.label = lbl
 
                 p.set_snap(False)
 
                 for p in patch[1:]:
                     p.update(kwargs)
-                    p.set_label('_nolegend_')
+                    p.label = '_nolegend_'
 
         if binsgiven:
             if orientation == 'vertical':

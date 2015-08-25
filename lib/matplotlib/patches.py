@@ -152,7 +152,9 @@ class Patch(artist.Artist):
         # patch with a path.  However, patches that have a faster
         # algebraic solution to hit-testing should override this
         # method.
-        if six.callable(self._contains):
+
+        # self._contains should already be callable
+        if self._contains is not None:
             return self._contains(self, mouseevent)
         if radius is None:
             radius = self.get_linewidth()
