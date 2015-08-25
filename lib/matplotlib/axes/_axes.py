@@ -6212,7 +6212,7 @@ class Axes(_AxesBase):
                 if lbl is not None:
                     p.label = lbl
 
-                p.set_snap(False)
+                p.snap = False
 
                 for p in patch[1:]:
                     p.update(kwargs)
