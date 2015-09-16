@@ -1400,7 +1400,7 @@ class Figure(FigureBase, Artist):
                           "and is unlikely to function correctly." %
                           (version, ))
 
-        self.__dict__ = state
+        Artist.__setstate__(self, state)
 
         # re-initialise some of the unstored state information
         self._axobservers = []
