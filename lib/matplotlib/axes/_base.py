@@ -3216,9 +3216,13 @@ class _AxesBase(martist.Artist):
     def minorticks_on(self):
         'Add autoscaling minor ticks to the axes.'
         for ax in (self.xaxis, self.yaxis):
-            if ax.get_scale() == 'log':
+            scale = ax.get_scale()
+            if scale == 'log':
                 s = ax._scale
                 ax.set_minor_locator(mticker.LogLocator(s.base, s.subs))
+            elif scale == 'symlog':
+                s = ax._scale
+                ax.set_minor_locator(mticker.SymLogLocator(s.base, s.subs))
             else:
                 ax.set_minor_locator(mticker.AutoMinorLocator())
 
@@ -3305,7 +3309,7 @@ class _AxesBase(martist.Artist):
         self.set_xlim((xmin, xmax))
         self.set_ylim((ymin, ymax))
 
-    def _set_view_from_bbox(self, bbox, original_view, direction='in',
+    def _set_view_from_bbox(self, bbox, direction='in',
                             mode=None, twinx=False, twiny=False):
         """
         Update view from a selection bbox.
@@ -3320,10 +3324,6 @@ class _AxesBase(martist.Artist):
 
         bbox : tuple
             The selected bounding box limits, in *display* coordinates.
-
-        original_view : any
-            A view saved from before initiating the selection, the result of
-            calling :meth:`_get_view`.
 
         direction : str
             The direction to apply the bounding box.
@@ -3344,8 +3344,6 @@ class _AxesBase(martist.Artist):
         """
 
         lastx, lasty, x, y = bbox
-
-        x0, y0, x1, y1 = original_view
 
         # zoom to rect
         inverse = self.transData.inverted()

@@ -265,6 +265,19 @@ of the property cycle, if it exists.
 Timeline for removal has not been set.
 
 
+Bundled jquery
+--------------
+
+The version of jquery bundled with the webagg backend has been upgraded
+from 1.7.1 to 1.11.3.  If you are using the version of jquery bundled
+with webagg you will need to update you html files as such
+
+.. code-block:: diff
+
+   -    <script src="_static/jquery/js/jquery-1.7.1.min.js"></script>
+   +    <script src="_static/jquery/js/jquery-1.11.3.min.js"></script>
+
+
 Code Removed
 ------------
 
@@ -1532,7 +1545,7 @@ New methods:
 
   * :meth:`draw_markers(self, gc, marker_path, marker_trans, path,
     trans, rgbFace)
-    <matplotlib.backend_bases.RendererBase.draw_markers`
+    <matplotlib.backend_bases.RendererBase.draw_markers>`
 
   * :meth:`draw_path_collection(self, master_transform, cliprect,
     clippath, clippath_trans, paths, all_transforms, offsets,
