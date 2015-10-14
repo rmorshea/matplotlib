@@ -21,7 +21,7 @@ import matplotlib.units as munits
 import numpy as np
 import warnings
 
-from .traitlets import Instance, retrieve
+from .traitlets import Instance, retrieve, BaseDescriptor
 
 GRIDLINE_INTERPOLATION_STEPS = 180
 
@@ -328,7 +328,11 @@ class Tick(artist.Artist):
                 # for labelsize the text objects covert str ('small')
                 # -> points. grab the integer from the `Text` object
                 # instead of saving the string representation
-                v = getattr(self.label1, 'get_' + k)()
+                klass = self.label1.__class__
+                if isinstance(getattr(klass, k, None), BaseDescriptor):
+                    v = getattr(self.label1, k)
+                else:
+                    v = getattr(self.label1, 'get_' + k)()
                 setattr(self, '_' + k, v)
 
 
@@ -619,7 +623,7 @@ class Axis(artist.Artist):
     """
     OFFSETTEXTPAD = 3
 
-    label = Instance(mtext.Text, allow_none=True)
+    label = Instance(mtext.Text, allow_none=True, prop=True)
 
     def __str__(self):
         return self.__class__.__name__ \

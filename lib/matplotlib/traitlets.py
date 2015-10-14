@@ -8,7 +8,8 @@ from traitlets import (TraitType, Int, Float, Bool,
                        Unicode, Tuple, TraitError,
                        Undefined, BaseDescriptor,
                        getargspec, observe, default,
-                       validate, EventHandler)
+                       validate, EventHandler,
+                       ObserveHandler)
 
 import re
 import types
@@ -367,6 +368,7 @@ class Color(TraitType):
 
 
 def _traitlets_deprecation_msg(name):
+    raise
     msg = ("This has been deprecated to make way for IPython's Traitlets."
            " Please use the '%s' TraitType and Traitlet event decorators.")
     return msg % name

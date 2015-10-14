@@ -188,18 +188,7 @@ class AttributeCopier(object):
     #return self._ref_artist
 
     def get_attribute_from_ref_artist(self, attr_name, default_value):
-        get_attr_method_name = "get_"+attr_name
-        c = getattr(self._klass, get_attr_method_name)(self)
-        if c == 'auto':
-            ref_artist = self.get_ref_artist()
-            if ref_artist:
-                attr = getattr(ref_artist,
-                               get_attr_method_name)()
-                return attr
-            else:
-                return default_value
-
-        return c
+        return getattr(self._ref_artist, attr_name, default_value)
 
 
 from matplotlib.lines import Line2D

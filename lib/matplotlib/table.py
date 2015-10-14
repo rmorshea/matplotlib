@@ -35,7 +35,7 @@ from matplotlib import docstring
 from .text import Text
 from .transforms import Bbox
 from matplotlib.path import Path
-from .traitlets import Instance, observe, _traitlets_deprecation_msg
+from .traitlets import observe, _traitlets_deprecation_msg
 
 
 class Cell(Rectangle):

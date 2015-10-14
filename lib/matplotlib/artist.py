@@ -19,7 +19,8 @@ from .traitlets import (Instance, Configurable, TransformInstance, Bool,
                         Undefined, Union, BaseDescriptor, getargspec,
                         PrivateMethodMixin, Float, TraitError, Unicode,
                         Stringlike, Callable, Tuple, List, observe, validate,
-                        default, retrieve, _traitlets_deprecation_msg)
+                        default, retrieve, _traitlets_deprecation_msg,
+                        ObserveHandler)
 
 
 # Note, matplotlib artists use the doc strings for set and get
@@ -89,17 +90,16 @@ class Artist(PrivateMethodMixin, Configurable):
     aname = 'Artist'
     zorder = 0
 
-    transform = TransformInstance(None)
-
-    @observe('transform')
-    def _transform_changed(self, change):
-        self.pchanged()
-        self.stale = True
+    transform = TransformInstance(None, prop=True)
 
     @validate('transform')
     def _transform_validate(self, commit):
         self.transform_set = True
         return commit['value']
+
+    @observe('transform')
+    def _transform_changed(self, change):
+        self.stale = True
 
     @retrieve('transform')
     def _transform_getter(self, pull):
@@ -136,34 +136,30 @@ class Artist(PrivateMethodMixin, Configurable):
         if new not in (Undefined, None) and new is not self:
             self.stale_callback = _stale_axes_callback
 
-    figure = Instance(str('matplotlib.figure.FigureBase'), allow_none=True)
+    figure = Instance(str('matplotlib.figure.FigureBase'),
+                      allow_none=True, prop=True)
 
     @observe('figure')
     def _figure_changed(self, change):
         if change['old'] not in (None, Undefined):
             raise RuntimeError("Can not put single artist in "
                                "more than one figure")
-        new = change['new']
-        if new and new is not self:
-            self.pchanged()
         self.stale = True
 
-    visible = Bool(True)
+    visible = Bool(True, prop=True)
 
     @observe('visible')
     def _visible_changed(self, change):
-        self.pchanged()
         self.stale = True
 
-    animated = Bool(False)
+    animated = Bool(False, prop=True)
 
     @observe('animated')
     def _animated_changed(self, change):
-        self.pchanged()
         self.stale = True
 
     # Float defaults to 0.0, must have None arg
-    alpha = Float(None, allow_none=True)
+    alpha = Float(None, allow_none=True, prop=True)
 
     @validate('alpha')
     def _alpha_validate(self, commit):
@@ -176,7 +172,6 @@ class Artist(PrivateMethodMixin, Configurable):
 
     @observe('alpha')
     def _alpha_changed(self, c):
-        self.pchanged()
         self.stale = True
 
     rasterized = Bool(None, allow_none=True)
@@ -202,16 +197,16 @@ class Artist(PrivateMethodMixin, Configurable):
 
     eventson = Bool(False)
 
-    clipbox = Instance(str('matplotlib.transforms.BboxBase'), allow_none=True)
+    clipbox = Instance(str('matplotlib.transforms.BboxBase'),
+                        allow_none=True, prop=True)
 
     @observe('clipbox')
     def _clipbox_changed(self, change):
-        self.pchanged()
         self.stale = True
 
     clippath = Union((Instance(str('matplotlib.patches.Patch')),
                       Instance(str('matplotlib.transforms.TransformedPath'))),
-                      allow_none=True)
+                      allow_none=True, prop=True)
 
     @default('clippath')
     def _clippath_default(self): pass
@@ -225,23 +220,17 @@ class Artist(PrivateMethodMixin, Configurable):
 
     @observe('clippath')
     def _clippath_changed(self, change):
-        self.pchanged()
         self.stale = True
 
-    clipon = Bool(True)
+    clipon = Bool(True, prop=True)
 
     @observe('clipon')
     def _clipon_changed(self, change):
         # This may result in the callbacks being hit twice, but ensures they
         # are hit at least once
-        self.pchanged()
         self.stale = True
 
-    label = Stringlike('', allow_none=True)
-
-    @observe('label')
-    def _label_changed(self, change):
-        self.pchanged()
+    label = Stringlike('', allow_none=True, prop=True)
 
     picker = Union((Bool(), Float(), Callable()), allow_none=True)
 
@@ -299,8 +288,7 @@ class Artist(PrivateMethodMixin, Configurable):
         if self.sketch_scale is None and change['new'] is not None:
             raise TraitError("Cannot set '%s' while 'sketch_scale'"
                              " is None" % change['name'])
-        else:
-            self.stale = True
+        self.stale = True
 
     path_effects = List(Instance('matplotlib.patheffects.AbstractPathEffect'),
                         allow_none=True)
@@ -348,6 +336,9 @@ class Artist(PrivateMethodMixin, Configurable):
         # self._snap = None
         self.set_sketch_params(all=rcParams['path.sketch'])
         self.path_effects = rcParams['path.effects']
+
+        prop_names = self.trait_names(prop=True)
+        self.observe(self.pchanged, prop_names)
 
     def __getstate__(self):
         d = super(Artist, self).__getstate__()
@@ -483,8 +474,21 @@ class Artist(PrivateMethodMixin, Configurable):
         Returns an *id* that is useful for removing the callback with
         :meth:`remove_callback` later.
         """
+        # only required to handle removal via the oid
+        # in the future remove should be done with o
         oid = self._oid
         self._propobservers[oid] = func
+
+        # this method can eventually be depricated in
+        # favor of a simple call to observe, however
+        # because the current api for the callbacks
+        # is to only accept one argument (that being
+        # the instance whose property has changed) this
+        # is needed to resolves traitlet api conflicts.
+        prop_names = self.trait_names(prop=True)
+        observer = ObserveHandler(prop_names, type='pchanged')
+        observer(func).instance_init(self)
+
         self._oid += 1
         return oid
 
@@ -499,17 +503,25 @@ class Artist(PrivateMethodMixin, Configurable):
 
         """
         try:
-            del self._propobservers[oid]
+            func = self._propobservers.pop(oid)
+            prop_names = self.trait_names(prop=True)
+            self.unobserve(func, prop_names, type='pchanged')
         except KeyError:
             pass
 
-    def pchanged(self):
+    def pchanged(self, change=None):
         """
         Fire an event when property changed, calling all of the
         registered callbacks.
         """
-        for oid, func in six.iteritems(self._propobservers):
-            func(self)
+        if change:
+            if change['name'] == 'figure':
+                if not self.figure or self.figure is self:
+                    return
+            self._notify_change(change['name'], 'pchanged', change)
+        else:
+            for oid, func in six.iteritems(self._propobservers):
+                func(self)
 
     def is_transform_set(self):
         """
@@ -1089,7 +1101,6 @@ class Artist(PrivateMethodMixin, Configurable):
             changed = True
         self.eventson = store
         if changed:
-            self.pchanged()
             self.stale = True
 
     def get_label(self):
@@ -1124,7 +1135,6 @@ class Artist(PrivateMethodMixin, Configurable):
         ACCEPTS: any number
         """
         self.zorder = level
-        self.pchanged()
         self.stale = True
 
     def update_from(self, other):
@@ -1139,7 +1149,6 @@ class Artist(PrivateMethodMixin, Configurable):
 
         self.set_sketch_params(all=other.sketch_params)
 
-        self.pchanged()
         self.stale = True
 
     def properties(self):
@@ -1159,13 +1168,14 @@ class Artist(PrivateMethodMixin, Configurable):
         ret = []
         for k, v in sorted(kwargs.items(), reverse=True):
             k = k.lower()
-            func = getattr(self, 'set_'+k, None)
-            if func is not None and six.callable(func):
-                ret.extend([func(v)])
+                
+            klass = self.__class__
+            if isinstance(getattr(klass, k, None), BaseDescriptor):
+                ret.extend([setattr(self, k, v)])
             else:
-                klass = self.__class__
-                if isinstance(getattr(klass, k, None), BaseDescriptor):
-                    ret.extend([setattr(self, k, v)])
+                func = getattr(self, 'set_'+k, None)
+                if func is not None and six.callable(func):
+                    ret.extend([func(v)])
                 else:
                     raise TypeError('There is no %s property "%s"' %
                                (self.__class__.__name__, k))
