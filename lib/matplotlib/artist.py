@@ -91,15 +91,15 @@ class Artist(PrivateMethodMixin, Configurable):
 
     transform = TransformInstance(None)
 
-    @observe('transform')
-    def _transform_changed(self, change):
-        self.pchanged()
-        self.stale = True
-
     @validate('transform')
     def _transform_validate(self, commit):
         self.transform_set = True
         return commit['value']
+
+    @observe('transform')
+    def _transform_changed(self, change):
+        self.pchanged()
+        self.stale = True
 
     @retrieve('transform')
     def _transform_getter(self, pull):
