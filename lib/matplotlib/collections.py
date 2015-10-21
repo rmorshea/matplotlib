@@ -28,7 +28,7 @@ import matplotlib.backend_bases as backend_bases
 import matplotlib.path as mpath
 from matplotlib import _path
 import matplotlib.mlab as mlab
-from matplotlib.traitlets import observe, _traitlets_deprecation_msg
+from matplotlib.traitlets import validate, _traitlets_deprecation_msg
 
 
 CIRCLE_AREA_FACTOR = 1.0 / np.sqrt(np.pi)
@@ -667,8 +667,8 @@ class Collection(artist.Artist, cm.ScalarMappable):
         return self.set_edgecolor(c)
 
     @observe('alpha')
-    def _alpha_changed(self, commit):
-        value = artist.Artist._alpha_validate(self, commit)
+    def _alpha_changed(self, change):
+        value = change['new']
 
         try:
             self._facecolors = mcolors.colorConverter.to_rgba_array(

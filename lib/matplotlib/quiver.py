@@ -231,7 +231,7 @@ class QuiverKey(martist.Artist):
     valign = {'N': 'bottom', 'S': 'top', 'E': 'center', 'W': 'center'}
     pivot = {'N': 'mid', 'S': 'mid', 'E': 'tip', 'W': 'tail'}
 
-    label = Instance(mtext.Text, allow_none=True)
+    label = Instance(mtext.Text, allow_none=True, prop=True)
 
     def __init__(self, Q, X, Y, U, label, **kw):
         martist.Artist.__init__(self)

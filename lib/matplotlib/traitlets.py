@@ -8,7 +8,8 @@ from traitlets import (TraitType, Int, Float, Bool,
                        Unicode, Tuple, TraitError,
                        Undefined, BaseDescriptor,
                        getargspec, observe, default,
-                       validate, EventHandler)
+                       validate, EventHandler,
+                       ObserveHandler)
 
 import re
 import types
