@@ -694,7 +694,6 @@ class Line2D(Artist):
 
     @observe('transform')
     def _transform_changed(self, change):
-        Artist._transform_changed(self, change)
         self._invalidx = True
         self._invalidy = True
         self.stale = True

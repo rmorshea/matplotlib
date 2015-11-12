@@ -19,7 +19,7 @@ from .traitlets import (Instance, Configurable, TransformInstance, Bool,
                         Undefined, Union, BaseDescriptor, getargspec,
                         PrivateMethodMixin, Float, TraitError, Unicode,
                         Stringlike, Callable, Tuple, List, observe, validate,
-                        default, retrieve, _traitlets_deprecation_msg)
+                        default, retrieve, _traitlets_deprecation_msg, batch)
 
 
 # Note, matplotlib artists use the doc strings for set and get
@@ -90,7 +90,33 @@ class Artist(PrivateMethodMixin, Configurable):
     zorder = 0
 
     transform_set = Bool(False, allow_none=True)
-    transform = TransformInstance()
+    transform = TransformInstance(perishable=True, prop=True)
+
+    @batch(tags={'prop':True}, stack=0)
+    def pchanged(self):
+        """
+        Fire an event when property changed, calling all of the
+        registered callbacks.
+        """
+        for oid, func in six.iteritems(self._propobservers):
+            func(self)
+
+    @batch(tags={'perishable':True}, stack=1)
+    def became_stale(self):
+        self.stale = True
+
+    stale = Bool(True)
+
+    @validate('stale')
+    def _stale_validate(self, commit):
+        if self.animated:
+            return self.stale
+        return commit['value']
+
+    @observe('stale')
+    def _stale_changed(self, change):
+        if change['new'] and self.stale_callback is not None:
+            self.stale_callback(self, change['new'])
 
     @default('transform')
     def _transform_default(self):
@@ -106,29 +132,11 @@ class Artist(PrivateMethodMixin, Configurable):
         self.transform_set = was_set
         return commit['value']
 
-    @observe('transform')
-    def _transform_changed(self, change):
-        self.pchanged()
-        self.stale = True
-
     @retrieve('transform')
     def _transform_getter(self, pull):
         if pull['trait']._conversion_method:
             return pull['value'](self.axes)
         return pull['value']
-
-    stale = Bool(True)
-
-    @validate('stale')
-    def _stale_validate(self, commit):
-        if self.animated:
-            return self.stale
-        return commit['value']
-
-    @observe('stale')
-    def _stale_changed(self, change):
-        if change['new'] and self.stale_callback is not None:
-            self.stale_callback(self, change['new'])
 
     axes = Instance(str('matplotlib.axes.Axes'), allow_none=True)
 
@@ -144,7 +152,8 @@ class Artist(PrivateMethodMixin, Configurable):
         if new not in (Undefined, None) and new is not self:
             self.stale_callback = _stale_axes_callback
 
-    figure = Instance(str('matplotlib.figure.FigureBase'), allow_none=True)
+    figure = Instance(str('matplotlib.figure.FigureBase'),
+                      allow_none=True, perishable=True, prop=True)
 
     @observe('figure')
     def _figure_changed(self, change):
@@ -152,26 +161,13 @@ class Artist(PrivateMethodMixin, Configurable):
             raise RuntimeError("Can not put single artist in "
                                "more than one figure")
         new = change['new']
-        if new and new is not self:
-            self.pchanged()
-        self.stale = True
 
-    visible = Bool(True)
+    visible = Bool(True, perishable=True, prop=True)
 
-    @observe('visible')
-    def _visible_changed(self, change):
-        self.pchanged()
-        self.stale = True
-
-    animated = Bool(False)
-
-    @observe('animated')
-    def _animated_changed(self, change):
-        self.pchanged()
-        self.stale = True
+    animated = Bool(False, perishable=True, prop=True)
 
     # Float defaults to 0.0, must have None arg
-    alpha = Float(None, allow_none=True)
+    alpha = Float(None, allow_none=True, perishable=True, prop=True)
 
     @validate('alpha')
     def _alpha_validate(self, commit):
@@ -181,11 +177,6 @@ class Artist(PrivateMethodMixin, Configurable):
             repl = (commit['trait'].name, self.__class__.__name__)
             raise TraitError(msg % repl)
         return commit['value']
-
-    @observe('alpha')
-    def _alpha_changed(self, c):
-        self.pchanged()
-        self.stale = True
 
     rasterized = Bool(None, allow_none=True)
 
@@ -210,16 +201,12 @@ class Artist(PrivateMethodMixin, Configurable):
 
     eventson = Bool(False)
 
-    clipbox = Instance(str('matplotlib.transforms.BboxBase'), allow_none=True)
-
-    @observe('clipbox')
-    def _clipbox_changed(self, change):
-        self.pchanged()
-        self.stale = True
+    clipbox = Instance(str('matplotlib.transforms.BboxBase'),
+                       allow_none=True, perishable=True, prop=True)
 
     clippath = Union((Instance(str('matplotlib.patches.Patch')),
                       Instance(str('matplotlib.transforms.TransformedPath'))),
-                      allow_none=True)
+                      allow_none=True, perishable=True, prop=True)
 
     @default('clippath')
     def _clippath_default(self): pass
@@ -231,25 +218,15 @@ class Artist(PrivateMethodMixin, Configurable):
             value = TransformedPath(value.get_path(), value.transform)
         return value
 
-    @observe('clippath')
-    def _clippath_changed(self, change):
-        self.pchanged()
-        self.stale = True
+    clipon = Bool(True, perishable=True, prop=True)
 
-    clipon = Bool(True)
+    # @observe('clipon')
+    # def _clipon_changed(self, change):
+    #     # This may result in the callbacks being hit twice, but ensures they
+    #     # are hit at least once
+    #     self.pchanged()
 
-    @observe('clipon')
-    def _clipon_changed(self, change):
-        # This may result in the callbacks being hit twice, but ensures they
-        # are hit at least once
-        self.pchanged()
-        self.stale = True
-
-    label = Stringlike('', allow_none=True)
-
-    @observe('label')
-    def _label_changed(self, change):
-        self.pchanged()
+    label = Stringlike('', allow_none=True, prop=True)
 
     picker = Union((Bool(), Float(), Callable()), allow_none=True)
 
@@ -269,13 +246,9 @@ class Artist(PrivateMethodMixin, Configurable):
             else:
                 ax.mouseover_set.discard(self)
 
-    agg_filter = Callable(None, allow_none=True)
+    agg_filter = Callable(None, allow_none=True, perishable=True)
 
-    @observe('agg_filter')
-    def _agg_filter_changed(self, change):
-        self.stale = True
-
-    snap = Bool(None, allow_none=True)
+    snap = Bool(None, allow_none=True, perishable=True)
 
     @retrieve('snap')
     def _snap_getter(self, pull):
@@ -284,11 +257,7 @@ class Artist(PrivateMethodMixin, Configurable):
         else:
             return False
 
-    @observe('snap')
-    def _snap_changed(self, change):
-        self.stale = True
-
-    sketch_scale = Float(None, allow_none=True)
+    sketch_scale = Float(None, allow_none=True, perishable=True)
 
     @observe('sketch_scale')
     def _sketch_scale_changed(self, change):
@@ -296,25 +265,18 @@ class Artist(PrivateMethodMixin, Configurable):
             with self.mute_trait_notifications():
                 setattr(self, 'sketch_length', None)
                 setattr(self, 'sketch_randomness', None)
-        self.stale = True
 
-    sketch_length = Float(128.0, allow_none=True)
-    sketch_randomness = Float(16.0, allow_none=True)
+    sketch_length = Float(128.0, allow_none=True, perishable=True)
+    sketch_randomness = Float(16.0, allow_none=True, perishable=True)
 
     @observe('sketch_length', 'sketch_randomness')
     def _sketch_length_or_randomness_changed(self, change):
         if self.sketch_scale is None and change['new'] is not None:
             raise TraitError("Cannot set '%s' while 'sketch_scale'"
                              " is None" % change['name'])
-        else:
-            self.stale = True
 
     path_effects = List(Instance('matplotlib.patheffects.AbstractPathEffect'),
-                        allow_none=True)
-
-    @observe('path_effects')
-    def _path_effects_changed(self, change):
-        self.stale = True
+                        allow_none=True, perishable=True)
 
     url = Unicode(allow_none=True)
 
@@ -509,14 +471,6 @@ class Artist(PrivateMethodMixin, Configurable):
             del self._propobservers[oid]
         except KeyError:
             pass
-
-    def pchanged(self):
-        """
-        Fire an event when property changed, calling all of the
-        registered callbacks.
-        """
-        for oid, func in six.iteritems(self._propobservers):
-            func(self)
 
     def is_transform_set(self):
         """
@@ -1096,7 +1050,7 @@ class Artist(PrivateMethodMixin, Configurable):
                         func(v)
                     else:
                         raise AttributeError('Unknown property %s' % k)
-            changed = True
+                    changed = True
         self.eventson = store
         if changed:
             self.pchanged()

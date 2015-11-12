@@ -584,7 +584,6 @@ class Text(Artist):
 
     @observe('clipbox')
     def _clipbox_changed(self, change):
-        super(Text, self)._clipbox_changed(change)
         self._update_clip_properties()
 
     def set_clip_box(self, clipbox):
@@ -623,7 +622,6 @@ class Text(Artist):
 
     @observe('clipon')
     def _clipon_changed(self, change):
-        super(Text, self)._clipon_changed(change)
         self._update_clip_properties()
 
     def set_clip_on(self, b):

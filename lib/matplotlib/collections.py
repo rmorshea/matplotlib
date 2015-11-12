@@ -668,7 +668,6 @@ class Collection(artist.Artist, cm.ScalarMappable):
 
     @observe('alpha')
     def _alpha_changed(self, change):
-        artist.Artist._alpha_changed(self, change)
 
         value = change['new']
         try:

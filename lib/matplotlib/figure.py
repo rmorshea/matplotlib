@@ -243,7 +243,8 @@ class SubplotParams(object):
 # the "figure" attribute of an artist which performs
 # a type check (e.g `True if figure else False`)
 class FigureBase(object):
-    pass
+    
+    figure = None
 
 
 class Figure(FigureBase, Artist):

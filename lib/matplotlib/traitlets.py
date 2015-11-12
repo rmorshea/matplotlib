@@ -8,7 +8,7 @@ from traitlets import (TraitType, Int, Float, Bool,
                        Unicode, Tuple, TraitError,
                        Undefined, BaseDescriptor,
                        getargspec, observe, default,
-                       validate, EventHandler)
+                       validate, EventHandler, All)
 
 import re
 import types
@@ -133,6 +133,73 @@ class PrivateMethodMixin(object):
             msg = "'%s' is not a traitlet of a %s instance"
             raise TraitError(msg % (name, self.__class__.__name__))
         return trait
+
+
+def batch(*names, **kwargs):
+    tags = kwargs.get('tags')
+    stack = kwargs.get('stack', 0)
+    types = kwargs.get('types', ('change',))
+    return BatchHandler(names, types=types, tags=tags,
+                          stack=stack)
+
+
+class BatchHandler(EventHandler):
+
+    def __init__(self, names, types=None, tags=None, stack=0):
+        self.trait_names = names
+        self.types = types
+        self.tags = tags
+        self.stack = stack
+
+    def matches(self, change):
+        if change['type'] in self.types:
+            if All in self.trait_names:
+                return True
+            if change['name'] in self.trait_names:
+                return True
+            if self.tags:
+                inst = change['owner']
+                tagged = inst.trait_names(**self.tags)
+                if change['name'] in tagged:
+                    return True
+            return False
+
+    def instance_init(self, inst):
+        if not isinstance(inst._notify_change, BatchContextManager):
+            inst._notify_change = BatchContextManager()
+        inst._notify_change.add_context(self)
+
+
+class BatchContextManager(object):
+
+    def __init__(self):
+        self.holding = False
+        self.contexts = list()
+
+    def __call__(self, change):
+        inst = change['owner']
+        static = inst.__class__._notify_change
+        with self.notify_with_context(change):
+            static(inst, change)
+
+    @contextlib.contextmanager
+    def notify_with_context(self, change):
+        if self.holding:
+            yield
+        else:
+            try:
+                self.holding = True
+                yield
+            finally:
+                self.holding = False
+                key = lambda c: c.stack
+                for c in sorted(self.contexts, key=key):
+                    if c.matches(change):
+                        c(change['owner'])
+
+    def add_context(self, c):
+        if c not in self.contexts:
+            self.contexts.append(c)
 
 
 def retrieve(name):
