@@ -4,7 +4,7 @@ Classes for the ticks and x and y axis
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-from IPConfigurable.traitlets import Float
+from traitlets import Float
 from matplotlib.externals import six
 
 from matplotlib import rcParams
@@ -440,13 +440,11 @@ class XTick(Tick):
         'Get the default line2D instance'
         # x in data coords, y in axes coords
         l = mlines.Line2D(xdata=(0.0, 0.0), ydata=(0, 1.0),
-                   color=rcParams['grid.color'],
-                   linestyle=rcParams['grid.linestyle'],
-                   linewidth=2.0,
-                   alpha=rcParams['grid.alpha'],
-                   markersize=0,
-                   parent=self
-                   )
+                          color=rcParams['grid.color'],
+                          linestyle=rcParams['grid.linestyle'],
+                          linewidth=rcParams['grid.linewidth'],
+                          alpha=rcParams['grid.alpha'],
+                          markersize=0)
         l.set_transform(self.axes.get_xaxis_transform(which='grid'))
         l.get_path()._interpolation_steps = GRIDLINE_INTERPOLATION_STEPS
         self._set_artist_props(l)
@@ -583,13 +581,11 @@ class YTick(Tick):
         'Get the default line2D instance'
         # x in axes coords, y in data coords
         l = mlines.Line2D(xdata=(0, 1), ydata=(0, 0),
-                    color=rcParams['grid.color'],
-                    linestyle=rcParams['grid.linestyle'],
-                    linewidth=2.0,
-                    alpha=rcParams['grid.alpha'],
-                    markersize=0,
-                    parent=self
-                    )
+                          color=rcParams['grid.color'],
+                          linestyle=rcParams['grid.linestyle'],
+                          linewidth=rcParams['grid.linewidth'],
+                          alpha=rcParams['grid.alpha'],
+                          markersize=0)
 
         l.set_transform(self.axes.get_yaxis_transform(which='grid'))
         l.get_path()._interpolation_steps = GRIDLINE_INTERPOLATION_STEPS

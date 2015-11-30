@@ -68,9 +68,16 @@ def allow_rasterization(draw):
     draw_wrapper._supports_rasterization = True
     return draw_wrapper
 
-from IPConfigurable.configurable import Configurable
-from IPConfigurable.loader import Config
-import inspect 
+
+def _stale_axes_callback(self, val):
+    if self.axes:
+        self.axes.stale = val
+
+
+from traitlets.config import Configurable
+from traitlets.config import Config
+import inspect
+
 
 class Artist(Configurable):
     """
@@ -103,6 +110,9 @@ class Artist(Configurable):
         #print('init Artist with',c)
         super(Artist, self).__init__(config=c, parent=parent)
 
+        self._stale = True
+        self.stale_callback = None
+        self._axes = None
         self.figure = None
 
         self._transform = None
@@ -140,6 +150,7 @@ class Artist(Configurable):
         # (by the axes) if the artist lives on an axes.
         d['_remove_method'] = None
         d['stale_callback'] = None
+        d['parent'] = None
         return d
 
     def remove(self):

@@ -74,7 +74,7 @@ def segment_hits(cx, cy, x, y, radius):
     #print points,lines
     return np.concatenate((points, lines))
 
-from IPConfigurable.traitlets import Float
+from traitlets import Float
 
 def _mark_every_path(markevery, tpath, affine, ax_transform):
     """
@@ -249,7 +249,7 @@ class Line2D(Artist):
                 % (",".join(["(%g,%g)" % (x, y) for x, y
                              in zip(self._x, self._y)]))
 
-    t_lw = Float(2, config=True)
+    t_lw = Float(1.0, config=True)
 
     def __init__(self, xdata, ydata,
                  linewidth=None,  # all Nones default to rc
@@ -976,11 +976,8 @@ class Line2D(Artist):
     def set_linewidth(self, w):
         """
         Set the line width in points
-
         ACCEPTS: float value in points
         """
-        if w <= 0.5 :
-            raise ValueError('Nooooo not < 0.5')
         w = float(w)
         if self._linewidth != w:
             self.stale = True
